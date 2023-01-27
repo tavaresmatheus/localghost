@@ -7,3 +7,7 @@ api_test:
     path: /test
     controller: App\Controller\TestController::test
     methods: GET
+user:
+    path: /users
+    controller: App\Controller\UserController::index
+    methods: POST

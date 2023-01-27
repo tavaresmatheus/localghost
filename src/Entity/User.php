@@ -25,7 +25,7 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $password = null;
 
-    public function getId(): ?int
+    public function getId(): ?string
     {
         return $this->id;
     }
