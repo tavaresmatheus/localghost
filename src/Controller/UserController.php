@@ -2,24 +2,30 @@
 
 namespace App\Controller;
 
+use App\Businesses\UserBusiness;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserController extends AbstractController
 {
-    private $userRepository;
-    public function __construct(UserRepository $userRepository)
+    private UserRepository $userRepository;
+    private UserBusiness $userBusiness;
+
+    public function __construct(
+        UserRepository $userRepository,
+        UserBusiness $userBusiness
+    )
     {
         $this->userRepository = $userRepository;
+        $this->userBusiness = $userBusiness;
     }
 
     #[Route('/users', name: 'users')]
-    public function index(Request $request, UserPasswordHasherInterface $passwordHasher): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $requestContent = $request->getContent();
         $userInformation = json_decode($requestContent, true);
@@ -27,8 +33,9 @@ class UserController extends AbstractController
         $user = new User();
         $user->setName($userInformation['name']);
         $user->setEmail($userInformation['email']);
-        $user->setPassword($userInformation['password']);
-        $persistanceMessage = $this->userRepository->create($user);
+        $user->setPassword($this->userBusiness->encryptPassword($userInformation['password']));
+        $user->setRoles($userInformation['role']);
+        $persistanceMessage = $this->userRepository->save($user);
         return $this->json(
             [
                 'message' => 'User created successfuly.',
@@ -36,6 +43,7 @@ class UserController extends AbstractController
                     'id' => $persistanceMessage['id'],
                     'name' => $persistanceMessage['name'],
                     'e-mail' => $persistanceMessage['email'],
+                    'roles' => $persistanceMessage['roles'],
                 ],
             ],
             201

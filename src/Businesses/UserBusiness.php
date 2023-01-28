@@ -5,20 +5,26 @@ namespace App\Businesses;
 use App\Entity\User;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-
-
 class UserBusiness
 {
     private User $user;
+    private UserPasswordHasherInterface $passwordHasher;
 
-    public function __construct(User $user)
+    public function __construct(
+        User $user,
+        UserPasswordHasherInterface $passwordHasher
+    )
     {
         $this->user = $user;
+        $this->passwordHasher = $passwordHasher;
     }
 
-    public function encryptPassword(UserPasswordHasherInterface $passwordHasher): string
+    public function encryptPassword(string $userPassword): string
     {
-        $userPassword = $this->user->getPassword();
-        $passwordHasher->hasherPassword();
+        $hashedPassword = $this->passwordHasher->hashPassword(
+            $this->user,
+            $userPassword
+        );
+        return $hashedPassword;
     }
 }
