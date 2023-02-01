@@ -1,13 +1,14 @@
-# controllers:
-#     resource:
-#         path: ../src/Controller/
-#         namespace: App\Controller
-#     type: attribute
-api_test:
-    path: /test
-    controller: App\Controller\TestController::test
-    methods: GET
-user:
+api_user_register:
     path: /users
-    controller: App\Controller\UserController::index
+    controller: App\Controller\UserController::registerUser
     methods: POST
+
+api_user_remove:
+    path: /users/{id}
+    controller: App\Controller\UserController::removeUser
+    methods: DELETE
+
+api_user_detail:
+    path: /users/{id}
+    controller: App\Controller\UserController::detailUser
+    methods: GET

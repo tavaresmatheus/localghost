@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Businesses\UserBusiness;
 use App\Entity\User;
-use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -12,20 +11,15 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    private UserRepository $userRepository;
     private UserBusiness $userBusiness;
 
-    public function __construct(
-        UserRepository $userRepository,
-        UserBusiness $userBusiness
-    )
+    public function __construct(UserBusiness $userBusiness)
     {
-        $this->userRepository = $userRepository;
         $this->userBusiness = $userBusiness;
     }
 
     #[Route('/users', name: 'users')]
-    public function index(Request $request): JsonResponse
+    public function registerUser(Request $request): JsonResponse
     {
         $requestContent = $request->getContent();
         $userInformation = json_decode($requestContent, true);
@@ -35,7 +29,7 @@ class UserController extends AbstractController
         $user->setEmail($userInformation['email']);
         $user->setPassword($this->userBusiness->encryptPassword($userInformation['password']));
         $user->setRoles($userInformation['role']);
-        $persistanceMessage = $this->userRepository->save($user);
+        $persistanceMessage = $this->userBusiness->createUser($user);
         return $this->json(
             [
                 'message' => 'User created successfuly.',
@@ -49,4 +43,40 @@ class UserController extends AbstractController
             201
         );
     }
+
+    #[Route('/users/{id}', name: 'users')]
+    public function removeUser(string $id): JsonResponse
+    {
+        if ($this->userBusiness->findUserById($id)) {
+            return $this->json($id);
+            $removeMessage = $this->userBusiness->removeUser($id);
+            return $this->json(
+                [
+                    'message' => 'User removed successfuly.',
+                    'userInformation' => [
+                        'userId' => $removeMessage,
+                    ],
+                ],
+                202
+            );
+        }
+    }
+
+    #[Route('/users/{id}', name: 'users')]
+    public function detailUser(string $id): JsonResponse
+    {
+        $user = $this->userBusiness->findUserById($id);
+        return $this->json(
+            [
+                'message' => 'User detailed successfuly.',
+                'userInformation' => [
+                    'id' => $user->getId(),
+                    'name' => $user->getName(),
+                    'e-mail' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ]
+            ]
+        );
+    }
+
 }
