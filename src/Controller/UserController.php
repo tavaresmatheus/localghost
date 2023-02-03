@@ -47,25 +47,46 @@ class UserController extends AbstractController
     #[Route('/users/{id}', name: 'users')]
     public function removeUser(string $id): JsonResponse
     {
-        if ($this->userBusiness->findUserById($id)) {
-            return $this->json($id);
-            $removeMessage = $this->userBusiness->removeUser($id);
+        $user = $this->userBusiness->findUserById($id);
+
+        if (empty($user)) {
             return $this->json(
                 [
-                    'message' => 'User removed successfuly.',
-                    'userInformation' => [
-                        'userId' => $removeMessage,
-                    ],
+                    'message' => 'User does not exists.',
                 ],
-                202
+                422
             );
         }
+
+        $this->userBusiness->removeUser($id);
+        return $this->json(
+            [
+                'message' => 'User removed successfuly.',
+                'userInformation' => [
+                    'id' => $id,
+                    'name' => $user->getName(),
+                    'e-mail' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ],
+            ],
+            202
+        );
     }
 
     #[Route('/users/{id}', name: 'users')]
     public function detailUser(string $id): JsonResponse
     {
         $user = $this->userBusiness->findUserById($id);
+
+        if (empty($user)) {
+            return $this->json(
+                [
+                    'message' => 'User not found.',
+                ],
+                422
+            );
+        }
+
         return $this->json(
             [
                 'message' => 'User detailed successfuly.',
@@ -74,9 +95,32 @@ class UserController extends AbstractController
                     'name' => $user->getName(),
                     'e-mail' => $user->getEmail(),
                     'roles' => $user->getRoles(),
-                ]
-            ]
+                ],
+            ],
+            200
         );
     }
 
+    #[Route('/users', name: 'users')]
+    public function listUsers(): JsonResponse
+    {
+        $users = $this->userBusiness->listAllUsers();
+
+        if (empty($users)) {
+            return $this->json(
+                [
+                    'message' => 'Users list is empty.',
+                ],
+                200
+            );
+        }
+
+        return $this->json(
+            [
+                'message' => 'Users listed successfuly.',
+                'allUsers' => $users,
+            ],
+            200
+        );
+    }
 }

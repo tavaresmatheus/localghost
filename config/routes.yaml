@@ -12,3 +12,8 @@ api_user_detail:
     path: /users/{id}
     controller: App\Controller\UserController::detailUser
     methods: GET
+
+api_user_list:
+    path: /users
+    controller: App\Controller\UserController::listUsers
+    methods: GET

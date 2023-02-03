@@ -40,12 +40,10 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
     public function remove(string $userId): string
     {
         $user = $this->findById($userId);
-        if (!empty($user)) {
-            $this->getEntityManager()->remove($user);
-            return "User {$userId} removed.";
-        }
+        $this->getEntityManager()->remove($user);
+        $this->getEntityManager()->flush();
 
-        return 'User does not exists.';
+        return "User {$userId} removed.";
     }
 
     public function findById(string $userId): ?User
@@ -53,14 +51,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user = new User();
         $userClassName = get_class($user);
         $userFound = $this->getEntityManager()->find($userClassName, $userId);
-        if (!empty($userFound)) {
-            return $userFound;
-        }
 
-        return null;
+        return $userFound;
     }
 
-    public function upgradePassword(PasswordAuthenticatedUserInterface $user, string $newHashedPassword): void
+    public function listAll(): array
+    {
+        $user = new User();
+        $userClassName = get_class($user);
+        $users = $this->getEntityManager()->getRepository($userClassName);
+        $usersList = $users->findAll();
+
+        return $usersList;
+    }
+
+    public function upgradePassword(
+        PasswordAuthenticatedUserInterface $user,
+        string $newHashedPassword
+    ): void
     {
         if (!$user instanceof User) {
             throw new UnsupportedUserException(sprintf('Instances of "%s" are not supported.', \get_class($user)));
