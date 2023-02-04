@@ -29,15 +29,26 @@ class UserController extends AbstractController
         $user->setEmail($userInformation['email']);
         $user->setPassword($this->userBusiness->encryptPassword($userInformation['password']));
         $user->setRoles($userInformation['role']);
-        $persistanceMessage = $this->userBusiness->createUser($user);
+        $businessMessage = $this->userBusiness->createUser($user);
+
+        if (key_exists('errors', $businessMessage)) {
+            return $this->json(
+                [
+                    'message' => 'Could not create the user.',
+                    'errors' => $businessMessage['errors'],
+                ],
+                422
+            );
+        }
+
         return $this->json(
             [
                 'message' => 'User created successfuly.',
                 'userInformation' => [
-                    'id' => $persistanceMessage['id'],
-                    'name' => $persistanceMessage['name'],
-                    'e-mail' => $persistanceMessage['email'],
-                    'roles' => $persistanceMessage['roles'],
+                    'id' => $businessMessage['id'],
+                    'name' => $businessMessage['name'],
+                    'e-mail' => $businessMessage['email'],
+                    'roles' => $businessMessage['roles'],
                 ],
             ],
             201
@@ -47,9 +58,9 @@ class UserController extends AbstractController
     #[Route('/users/{id}', name: 'users')]
     public function removeUser(string $id): JsonResponse
     {
-        $user = $this->userBusiness->findUserById($id);
+        $businessMessage = $this->userBusiness->removeUser($id);
 
-        if (empty($user)) {
+        if (empty($businessMessage)) {
             return $this->json(
                 [
                     'message' => 'User does not exists.',
@@ -58,15 +69,14 @@ class UserController extends AbstractController
             );
         }
 
-        $this->userBusiness->removeUser($id);
         return $this->json(
             [
                 'message' => 'User removed successfuly.',
                 'userInformation' => [
-                    'id' => $id,
-                    'name' => $user->getName(),
-                    'e-mail' => $user->getEmail(),
-                    'roles' => $user->getRoles(),
+                    'id' => $businessMessage['id'],
+                    'name' => $businessMessage['name'],
+                    'e-mail' => $businessMessage['email'],
+                    'roles' => $businessMessage['roles'],
                 ],
             ],
             202

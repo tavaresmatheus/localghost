@@ -1,0 +1,17 @@
+App\Entity\User:
+    properties:
+        name:
+            - Type: string
+            - Length:
+                min: 2
+                max: 255
+                minMessage: 'Your name must have at least two characters long.'
+                maxMessage: 'Your name must have less than 255 characters long.'
+        email:
+            - Email:
+                mode: html5
+                message: 'The email you are trying to use is not valid.'
+        password:
+            - Regex:
+                pattern: '/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[$*&@#])[0-9a-zA-Z$*&@#]{11,}$/'
+                message: 'Your password must have a number, a lowercase letter, a uppercase letter, a special character and eleven digits.'

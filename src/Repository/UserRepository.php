@@ -21,29 +21,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function save(User $user): array
     {
-        if (empty($user->getId())) {
-            $this->getEntityManager()->persist($user);
-            $this->getEntityManager()->flush();
-            return [
-                'id' => $user->getId(),
-                'name' => $user->getName(),
-                'email' => $user->getEmail(),
-                'roles' => $user->getRoles(),
-            ];
-        }
+        $this->getEntityManager()->persist($user);
+        $this->getEntityManager()->flush();
 
         return [
-            'User already exists.',
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'roles' => $user->getRoles(),
         ];
     }
 
-    public function remove(string $userId): string
+    public function remove(string $userId): bool
     {
         $user = $this->findById($userId);
         $this->getEntityManager()->remove($user);
         $this->getEntityManager()->flush();
 
-        return "User {$userId} removed.";
+        return true;
     }
 
     public function findById(string $userId): ?User
@@ -51,6 +46,21 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user = new User();
         $userClassName = get_class($user);
         $userFound = $this->getEntityManager()->find($userClassName, $userId);
+
+        return $userFound;
+    }
+
+    public function findByEmail(string $userEmail): ?User
+    {
+        $user = new User();
+        $userClassName = get_class($user);
+        $userFound = $this->getEntityManager()
+            ->getRepository($userClassName)
+            ->findOneBy(
+                [
+                    'email' => $userEmail
+                ]
+            );
 
         return $userFound;
     }
