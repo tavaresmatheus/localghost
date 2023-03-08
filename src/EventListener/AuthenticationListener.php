@@ -50,7 +50,7 @@ class AuthenticationListener
         ];
         $response = new JsonResponse(
             $data,
-            403
+            JsonResponse::HTTP_UNAUTHORIZED
         );
         $event->setResponse($response);
     }

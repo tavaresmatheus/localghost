@@ -45,16 +45,7 @@ class UserBusiness
             ];
         }
 
-        $userCreated = $this->userRepository->create($user);
-
-        $userInformation = $this->findUserById($userCreated['id']);
-
-        $userInformation = [
-            'id' => $userInformation->getId(),
-            'name' => $userInformation->getName(),
-            'email' => $userInformation->getEmail(),
-            'roles' => $userInformation->getRoles(),
-        ];
+        $userInformation = $this->userRepository->save($user);
 
         return $userInformation;
     }
@@ -66,7 +57,7 @@ class UserBusiness
             return null;
         }
 
-        $this->userRepository->delete($userId);
+        $this->userRepository->remove($userId);
 
         return [
             'id' => $userId,
