@@ -18,5 +18,10 @@ api_user_list:
     controller: App\Controller\UserController::listUsers
     methods: GET
 
+api_user_update:
+    path: api/users/{id}
+    controller: App\Controller\UserController::updateUser
+    methods: PATCH
+
 api_login:
     path: api/login

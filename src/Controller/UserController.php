@@ -29,13 +29,13 @@ class UserController extends AbstractController
         $user->setEmail($userInformation['email']);
         $user->setPassword($this->userBusiness->encryptPassword($userInformation['password']));
         $user->setRoles($userInformation['role']);
-        $businessMessage = $this->userBusiness->createUser($user);
+        $businessResponse = $this->userBusiness->createUser($user);
 
-        if (key_exists('errors', $businessMessage)) {
+        if (key_exists('errors', $businessResponse)) {
             return $this->json(
                 [
                     'message' => 'Could not create the user.',
-                    'errors' => $businessMessage['errors'],
+                    'errors' => $businessResponse['errors'],
                 ],
                 422
             );
@@ -45,10 +45,10 @@ class UserController extends AbstractController
             [
                 'message' => 'User created successfuly.',
                 'userInformation' => [
-                    'id' => $businessMessage['id'],
-                    'name' => $businessMessage['name'],
-                    'e-mail' => $businessMessage['email'],
-                    'roles' => $businessMessage['roles'],
+                    'id' => $businessResponse['id'],
+                    'name' => $businessResponse['name'],
+                    'e-mail' => $businessResponse['email'],
+                    'roles' => $businessResponse['roles'],
                 ],
             ],
             201
@@ -58,9 +58,9 @@ class UserController extends AbstractController
     #[Route('/users/{id}', name: 'users')]
     public function removeUser(string $id): JsonResponse
     {
-        $businessMessage = $this->userBusiness->removeUser($id);
+        $businessResponse = $this->userBusiness->removeUser($id);
 
-        if (empty($businessMessage)) {
+        if (empty($businessResponse)) {
             return $this->json(
                 [
                     'message' => 'User does not exists.',
@@ -73,10 +73,10 @@ class UserController extends AbstractController
             [
                 'message' => 'User removed successfuly.',
                 'userInformation' => [
-                    'id' => $businessMessage['id'],
-                    'name' => $businessMessage['name'],
-                    'e-mail' => $businessMessage['email'],
-                    'roles' => $businessMessage['roles'],
+                    'id' => $businessResponse['id'],
+                    'name' => $businessResponse['name'],
+                    'e-mail' => $businessResponse['email'],
+                    'roles' => $businessResponse['roles'],
                 ],
             ],
             202
@@ -129,6 +129,37 @@ class UserController extends AbstractController
             [
                 'message' => 'Users listed successfuly.',
                 'allUsers' => $users,
+            ],
+            200
+        );
+    }
+
+    public function updateUser(
+        Request $request,
+        string $id
+    ): JsonResponse
+    {
+        $requestContent = $request->getContent();
+        $userInformation = json_decode($requestContent, true);
+        $businessResponse = $this->userBusiness->updateUser(
+            $userInformation,
+            $id
+        );
+
+        if (key_exists('errors', $businessResponse)) {
+            return $this->json(
+                [
+                    'message' => 'Could not update the user.',
+                    'errors' => $businessResponse['errors'],
+                ],
+                422
+            );
+        }
+
+        return $this->json(
+            [
+                'message' => 'User updated successfuly.',
+                'user' => $businessResponse,
             ],
             200
         );

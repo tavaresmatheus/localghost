@@ -32,15 +32,6 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         ];
     }
 
-    public function remove(string $userId): bool
-    {
-        $user = $this->findById($userId);
-        $this->getEntityManager()->remove($user);
-        $this->getEntityManager()->flush();
-
-        return true;
-    }
-
     public function findById(string $userId): ?User
     {
         $user = new User();
@@ -67,12 +58,39 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
 
     public function listAll(): array
     {
-        $user = new User();
-        $userClassName = get_class($user);
-        $users = $this->getEntityManager()->getRepository($userClassName);
-        $usersList = $users->findAll();
+        return $this->findAll();
+    }
 
-        return $usersList;
+    public function update(
+        array $userInformation,
+        string $userId
+    ): ?array
+    {
+        $user = $this->findById($userId);
+
+        if ($user->getUserInformation() === $userInformation) {
+            return null;
+        }
+
+        $user->updateUserInformatiton($userInformation);
+
+        $this->getEntityManager()->flush();
+
+        return [
+            'id' => $user->getId(),
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'roles' => $user->getRoles(),
+        ];
+    }
+
+    public function remove(string $userId): bool
+    {
+        $user = $this->findById($userId);
+        $this->getEntityManager()->remove($user);
+        $this->getEntityManager()->flush();
+
+        return true;
     }
 
     public function upgradePassword(

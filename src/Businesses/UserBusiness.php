@@ -45,9 +45,7 @@ class UserBusiness
             ];
         }
 
-        $userInformation = $this->userRepository->save($user);
-
-        return $userInformation;
+        return $this->userRepository->save($user);
     }
 
     public function removeUser(string $userId): ?array
@@ -69,9 +67,7 @@ class UserBusiness
 
     public function findUserById(string $userId): ?User
     {
-        $userInformation = $this->userRepository->findById($userId);
-
-        return $userInformation;
+        return $this->userRepository->findById($userId);
     }
 
     public function findUserByEmail(string $userEmail): ?User
@@ -97,14 +93,54 @@ class UserBusiness
         return $allUsers;
     }
 
+    public function updateUser(
+        array $userInformation,
+        string $userId
+    ): ?array
+    {
+        $validationErrors = $this->validator->validate($userInformation);
+        $errorQuantity = count($validationErrors);
+        if ($errorQuantity > 0) {
+            $errors = [];
+            for ($counter = 0; $counter < $errorQuantity; $counter++) {
+                $errors[$validationErrors->get($counter)->getPropertyPath()] = $validationErrors->get($counter)->getMessage();
+            }
+
+            return [
+                'errors' => $errors
+            ];
+        }
+
+        if (
+            !empty($userInformation['email']) &&
+            !empty($this->findUserByEmail($userInformation['email']))
+        ) {
+            return [
+                'errors' => 'This email is already in use.',
+            ];
+        }
+
+        $repositoryResponse = $this->userRepository->update(
+            $userInformation,
+            $userId
+        );
+
+        if ($repositoryResponse === null) {
+            return [
+                'errors' => 'Nothing was changed.',
+            ];
+        }
+
+        return $repositoryResponse;
+    }
+
     public function encryptPassword(string $userPassword): string
     {
         $user = new User();
-        $hashedPassword = $this->passwordHasher->hashPassword(
+
+        return $this->passwordHasher->hashPassword(
             $user,
             $userPassword
         );
-
-        return $hashedPassword;
     }
 }

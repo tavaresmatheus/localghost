@@ -105,6 +105,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function updateUserInformatiton(array $userInformation): void
+    {
+        if (array_key_exists('email', $userInformation)) {
+            $this->email = $userInformation['email'];
+        }
+        if (array_key_exists('name', $userInformation)) {
+            $this->name = $userInformation['name'];
+        }
+        if (array_key_exists('role', $userInformation)) {
+            $this->roles = $userInformation['role'];
+        }
+        if (array_key_exists('password', $userInformation)) {
+            $this->password = $userInformation['password'];
+        }
+    }
+
+    public function getUserInformation(): array
+    {
+        return [
+            'email' => $this->email,
+            'name' => $this->name,
+            'roles' => $this->roles,
+            'password' => $this->password,
+        ];
+    }
+
     /**
      * @see UserInterface
      */
